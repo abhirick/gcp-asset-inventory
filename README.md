@@ -210,3 +210,198 @@ Exporter (JSON / CSV / HTML)
 ```
 
 ---
+
+
+Got it. Here’s a clean Markdown-safe version you can paste directly into `README.md`.
+
+---
+
+## Authentication
+
+The script supports **Application Default Credentials (ADC)**.
+
+### Option 1. User authentication (local development)
+
+```bash
+gcloud auth application-default login
+```
+
+### Option 2. Service account authentication
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+
+
+
+
+
+
+
+
+
+---
+
+# GCP Asset Inventory Export Tool
+
+This project exports Google Cloud Platform assets to Google Cloud Storage using the Cloud Asset Inventory API.
+
+It is designed for:
+
+* Project-level asset exports
+* Folder-level asset exports
+* Organisation-level asset exports
+* Large-scale inventory pulls
+* Compliance and governance use cases
+
+The script uses REST transport for maximum compatibility with corporate networks, proxies, and VPC Service Controls environments.
+
+---
+
+## Features
+
+* Uses Cloud Asset Inventory `ExportAssets`
+* Exports to GCS in NDJSON format
+* Supports project, folder, and organisation scope
+* REST transport enabled for stability
+* Built-in retries and timeouts
+* Works with Application Default Credentials (ADC)
+
+---
+
+## Requirements
+
+Python 3.9+
+
+Install dependencies:
+
+```bash
+pip install google-cloud-asset google-api-core
+```
+
+---
+
+## Authentication
+
+The script supports Application Default Credentials (ADC).
+
+### Option 1. User authentication (local development)
+
+```bash
+gcloud auth application-default login
+```
+
+### Option 2. Service account
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+---
+
+## IAM Requirements
+
+Two identities must have proper permissions.
+
+### 1. Your calling identity (ADC)
+
+Must have permission to run Cloud Asset exports on the source scope:
+
+* On project → grant at project level
+* On folder → grant at folder level
+* On organisation → grant at org level
+
+Typical role:
+
+* Cloud Asset Viewer (or equivalent custom role with export permission)
+
+---
+
+### 2. Cloud Asset Service Agent
+
+Cloud Asset writes to GCS using a service agent:
+
+```
+service-PROJECT_NUMBER@gcp-sa-cloudasset.iam.gserviceaccount.com
+```
+
+This service account must have permission on the destination bucket:
+
+```
+roles/storage.objectCreator
+```
+
+Grant it on the bucket where the export file will be written.
+
+---
+
+## Usage
+
+### Export project assets
+
+```bash
+python export_assets.py \
+  --parent projects/YOUR_PROJECT_ID \
+  --gcs-uri gs://your-bucket/asset-exports/
+```
+
+---
+
+### Export organisation assets
+
+```bash
+python export_assets.py \
+  --parent organizations/YOUR_ORG_ID \
+  --gcs-uri gs://your-bucket/org-asset-exports/
+```
+
+---
+
+### Export only specific asset types (example: buckets)
+
+```bash
+python export_assets.py \
+  --parent projects/YOUR_PROJECT_ID \
+  --gcs-uri gs://your-bucket/asset-exports/ \
+  --asset-type storage.googleapis.com/Bucket
+```
+
+---
+
+## Output Format
+
+Exports are written to GCS as:
+
+* NDJSON (newline-delimited JSON)
+* One JSON object per asset
+* Suitable for:
+
+  * BigQuery ingestion
+  * Compliance scanning
+  * Security audits
+  * Offline analysis
+
+Example entry:
+
+```json
+{
+  "name": "//storage.googleapis.com/my-bucket",
+  "assetType": "storage.googleapis.com/Bucket",
+  ...
+}
+```
+
+---
+## Transport Mode
+The script uses:
+```
+transport="rest"
+```
+This avoids common issues with gRPC in:
+* Corporate proxy environments
+* VPN setups
+* TLS inspection
+* VPC Service Controls
+
+---
