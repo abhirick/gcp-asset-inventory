@@ -211,38 +211,6 @@ Exporter (JSON / CSV / HTML)
 
 ---
 
-
-Got it. Here’s a clean Markdown-safe version you can paste directly into `README.md`.
-
----
-
-## Authentication
-
-The script supports **Application Default Credentials (ADC)**.
-
-### Option 1. User authentication (local development)
-
-```bash
-gcloud auth application-default login
-```
-
-### Option 2. Service account authentication
-
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-```
-
-
-
-
-
-
-
-
-
-
----
-
 # GCP Asset Inventory Export Tool
 
 This project exports Google Cloud Platform assets to Google Cloud Storage using the Cloud Asset Inventory API.
